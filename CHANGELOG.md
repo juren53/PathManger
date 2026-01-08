@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0b] - Thu 08 Jan 2026 02:00:00 PM CST
+
+### Added
+- Window geometry persistence: GUI now saves and restores window size and position between sessions
+
+### Changed
+- Improved Source column contrast in GUI table with bold dark backgrounds and off-white text
+  - System entries: Dark blue background (#003C78) with off-white text
+  - User entries: Dark green background (#006400) with off-white text
+  - Environment entries: Light gray text for subtle appearance
+- Improved search result highlighting with white text on grey backgrounds for better readability
+  - Regular matches: Medium grey background with white text
+  - Current match: Dark grey background with white text
+
 ## [0.2.0a] - Thu 08 Jan 2026 11:32:00 AM CST
 
 ### Added

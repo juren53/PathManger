@@ -10,7 +10,7 @@ Usage:
     python pathmanager.py --gui     # Run in GUI mode
     python pathmanager.py --help    # Show help message
 
-Version: v0.2.0a 2026-01-08 1132 CST
+Version: v0.2.0b 2026-01-08 1400 CST
 Author: Jim U'Ren
 License: Personal and educational use
 """
@@ -33,7 +33,7 @@ def main():
     parser.add_argument(
         "--version",
         action="version",
-        version="PathManager v0.2.0a 2026-01-08 1132 CST"
+        version="PathManager v0.2.0b 2026-01-08 1400 CST"
     )
 
     args = parser.parse_args()

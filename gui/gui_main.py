@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QWidget, QStatusBar, QHeaderView, QLabel, QHBoxLayout,
     QMenuBar, QMessageBox, QLineEdit, QPushButton, QFrame, QDialog, QTextEdit
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QSettings
 from PyQt6.QtGui import QColor, QFont, QAction
 from core.path_analyzer import PathAnalyzer
 
@@ -25,12 +25,19 @@ class PathManagerWindow(QMainWindow):
         self.analyzer = PathAnalyzer()
         self.search_matches = []  # List of matching row indices
         self.current_match_index = -1  # Current position in search results
+        self.settings = QSettings("PathManager", "PathManager")
         self.init_ui()
 
     def init_ui(self):
         """Initialize the user interface"""
         self.setWindowTitle("PathManager - PATH Environment Manager")
-        self.setGeometry(100, 100, 1000, 600)
+
+        # Restore window geometry from settings, or use default
+        geometry = self.settings.value("geometry")
+        if geometry:
+            self.restoreGeometry(geometry)
+        else:
+            self.setGeometry(100, 100, 1000, 600)
 
         # Create menu bar
         self.create_menu_bar()
@@ -248,8 +255,8 @@ class PathManagerWindow(QMainWindow):
     def show_about_dialog(self):
         """Display the About dialog"""
         about_text = """<h2>PathManager</h2>
-        <p><b>Version:</b> v0.2.0a</p>
-        <p><b>Date:</b> 2026-01-08 11:32 AM CST</p>
+        <p><b>Version:</b> v0.2.0b</p>
+        <p><b>Date:</b> 2026-01-08 2:00 PM CST</p>
         <p><b>Status:</b> Phase 1 Complete - Foundation & Basic GUI</p>
         <br>
         <p>A Python utility for viewing and managing system PATH environment variables.</p>
@@ -400,16 +407,16 @@ class PathManagerWindow(QMainWindow):
                 source_item = QTableWidgetItem(entry.source.capitalize())
                 source_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 
-                # Color code by source with better contrast
+                # Color code by source with strong contrast
                 if entry.source == "system":
-                    source_item.setBackground(QColor(220, 240, 255))  # Very light blue
-                    source_item.setForeground(QColor(0, 80, 140))     # Dark blue text
+                    source_item.setBackground(QColor(0, 60, 120))     # Dark blue background
+                    source_item.setForeground(QColor(245, 245, 250))  # Off-white text
                 elif entry.source == "user":
-                    source_item.setBackground(QColor(230, 255, 230))  # Very light green
-                    source_item.setForeground(QColor(0, 100, 0))      # Dark green text
+                    source_item.setBackground(QColor(0, 100, 0))      # Dark green background
+                    source_item.setForeground(QColor(245, 245, 250))  # Off-white text
                 else:
                     # Environment (fallback)
-                    source_item.setForeground(QColor(100, 100, 100))  # Gray text
+                    source_item.setForeground(QColor(160, 160, 160))  # Light gray text
 
                 self.table.setItem(row, 2, source_item)
 
@@ -451,7 +458,7 @@ class PathManagerWindow(QMainWindow):
         self.statusBar.showMessage(status_text)
 
         # Add subdued version datestamp on the right
-        version_label = QLabel("v0.2.0a 2026-01-08 1132 CST")
+        version_label = QLabel("v0.2.0b 2026-01-08 1400 CST")
         version_label.setStyleSheet("color: #888888; font-size: 9pt;")
         self.statusBar.addPermanentWidget(version_label)
 
@@ -475,8 +482,9 @@ class PathManagerWindow(QMainWindow):
         for row in range(self.table.rowCount()):
             item = self.table.item(row, path_column)
             if item:
-                # Clear background from Path column (use Qt default)
+                # Clear background and foreground from Path column (use Qt default)
                 item.setData(Qt.ItemDataRole.BackgroundRole, None)
+                item.setData(Qt.ItemDataRole.ForegroundRole, None)
 
     def perform_search(self):
         """Perform search as text is typed"""
@@ -499,8 +507,9 @@ class PathManagerWindow(QMainWindow):
         for row in range(self.table.rowCount()):
             item = self.table.item(row, path_column)
             if item and search_lower in item.text().lower():
-                # Highlight matching path cell with yellow
-                item.setBackground(QColor(255, 255, 150))  # Yellow highlight
+                # Highlight matching path cell with medium grey background and white text
+                item.setBackground(QColor(128, 128, 128))  # Medium grey background
+                item.setForeground(QColor(255, 255, 255))  # White text
                 self.search_matches.append(row)
 
         # Update match counter
@@ -520,8 +529,9 @@ class PathManagerWindow(QMainWindow):
         row = self.search_matches[self.current_match_index]
         item = self.table.item(row, path_column)
         if item:
-            # Return to regular yellow highlight
-            item.setBackground(QColor(255, 255, 150))
+            # Return to regular medium grey highlight with white text
+            item.setBackground(QColor(128, 128, 128))  # Medium grey background
+            item.setForeground(QColor(255, 255, 255))  # White text
 
     def highlight_current_match(self):
         """Highlight the current match and scroll to it"""
@@ -534,10 +544,11 @@ class PathManagerWindow(QMainWindow):
         # Clear any existing row selection
         self.table.clearSelection()
 
-        # Make the current match stand out with a brighter highlight (orange)
+        # Make the current match stand out with a darker grey background
         item = self.table.item(row, path_column)
         if item:
-            item.setBackground(QColor(255, 200, 100))  # Orange highlight for current match
+            item.setBackground(QColor(80, 80, 80))    # Dark grey background for current match
+            item.setForeground(QColor(255, 255, 255))  # White text
 
         # Scroll to the row
         self.table.scrollToItem(item)
@@ -568,6 +579,11 @@ class PathManagerWindow(QMainWindow):
 
         self.current_match_index = (self.current_match_index - 1) % len(self.search_matches)
         self.highlight_current_match()
+
+    def closeEvent(self, event):
+        """Save window geometry when closing"""
+        self.settings.setValue("geometry", self.saveGeometry())
+        event.accept()
 
 
 def run_gui():
