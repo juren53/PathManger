@@ -9,7 +9,7 @@ from datetime import datetime
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QTableWidget, QTableWidgetItem,
     QVBoxLayout, QWidget, QStatusBar, QHeaderView, QLabel, QHBoxLayout,
-    QMenuBar, QMessageBox
+    QMenuBar, QMessageBox, QLineEdit, QPushButton, QFrame
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QFont, QAction
@@ -22,6 +22,8 @@ class PathManagerWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.analyzer = PathAnalyzer()
+        self.search_matches = []  # List of matching row indices
+        self.current_match_index = -1  # Current position in search results
         self.init_ui()
 
     def init_ui(self):
@@ -40,6 +42,11 @@ class PathManagerWindow(QMainWindow):
         # Add system information header
         header_layout = self.create_header()
         layout.addLayout(header_layout)
+
+        # Create search bar (initially hidden)
+        self.search_bar = self.create_search_bar()
+        layout.addWidget(self.search_bar)
+        self.search_bar.hide()
 
         # Create table widget
         self.table = QTableWidget()
@@ -77,12 +84,128 @@ class PathManagerWindow(QMainWindow):
 
         return header_layout
 
+    def create_search_bar(self) -> QFrame:
+        """Create the search bar widget"""
+        search_frame = QFrame()
+        search_frame.setFrameStyle(QFrame.Shape.StyledPanel)
+        search_frame.setStyleSheet("""
+            QFrame {
+                background-color: #e8e8e8;
+                padding: 5px;
+            }
+            QLabel {
+                color: #000000;
+            }
+        """)
+
+        search_layout = QHBoxLayout(search_frame)
+        search_layout.setContentsMargins(5, 5, 5, 5)
+
+        # Search label
+        search_label = QLabel("Find:")
+        search_label.setStyleSheet("color: #000000; font-weight: bold;")
+        search_layout.addWidget(search_label)
+
+        # Search input
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Search PATH entries...")
+        self.search_input.setStyleSheet("""
+            QLineEdit {
+                background-color: white;
+                color: black;
+                border: 1px solid #cccccc;
+                padding: 5px;
+                border-radius: 3px;
+            }
+        """)
+        self.search_input.returnPressed.connect(self.find_next)
+        self.search_input.textChanged.connect(self.perform_search)
+        search_layout.addWidget(self.search_input)
+
+        # Match counter label
+        self.match_label = QLabel("No matches")
+        self.match_label.setStyleSheet("color: #666666; margin-left: 10px;")
+        search_layout.addWidget(self.match_label)
+
+        # Previous button
+        prev_button = QPushButton("Previous")
+        prev_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 5px 15px;
+                border-radius: 3px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:pressed {
+                background-color: #3d8b40;
+            }
+        """)
+        prev_button.clicked.connect(self.find_previous)
+        search_layout.addWidget(prev_button)
+
+        # Next button
+        next_button = QPushButton("Next")
+        next_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 5px 15px;
+                border-radius: 3px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:pressed {
+                background-color: #3d8b40;
+            }
+        """)
+        next_button.clicked.connect(self.find_next)
+        search_layout.addWidget(next_button)
+
+        # Close button
+        close_button = QPushButton("✕")
+        close_button.setFixedWidth(30)
+        close_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f44336;
+                color: white;
+                border: none;
+                padding: 5px;
+                border-radius: 3px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #da190b;
+            }
+            QPushButton:pressed {
+                background-color: #c41408;
+            }
+        """)
+        close_button.clicked.connect(self.hide_search_bar)
+        search_layout.addWidget(close_button)
+
+        return search_frame
+
     def create_menu_bar(self):
         """Create the menu bar"""
         menubar = self.menuBar()
 
         # File Menu
         file_menu = menubar.addMenu("&File")
+
+        # Add Find action to File menu
+        find_action = QAction("&Find...", self)
+        find_action.setShortcut("Ctrl+F")
+        find_action.setStatusTip("Search PATH entries")
+        find_action.triggered.connect(self.show_search_bar)
+        file_menu.addAction(find_action)
+
+        file_menu.addSeparator()
 
         exit_action = QAction("E&xit", self)
         exit_action.setShortcut("Ctrl+Q")
@@ -240,6 +363,120 @@ class PathManagerWindow(QMainWindow):
         version_label = QLabel("v0.2.0 | 2026-01-08")
         version_label.setStyleSheet("color: #888888; font-size: 9pt;")
         self.statusBar.addPermanentWidget(version_label)
+
+    def show_search_bar(self):
+        """Show the search bar and focus the input"""
+        self.search_bar.show()
+        self.search_input.setFocus()
+        self.search_input.selectAll()
+
+    def hide_search_bar(self):
+        """Hide the search bar and clear highlights"""
+        self.search_bar.hide()
+        self.clear_search_highlights()
+        self.search_matches = []
+        self.current_match_index = -1
+        self.match_label.setText("No matches")
+
+    def clear_search_highlights(self):
+        """Clear search highlighting from the Path column only"""
+        path_column = 1
+        for row in range(self.table.rowCount()):
+            item = self.table.item(row, path_column)
+            if item:
+                # Clear background from Path column (use Qt default)
+                item.setData(Qt.ItemDataRole.BackgroundRole, None)
+
+    def perform_search(self):
+        """Perform search as text is typed"""
+        search_text = self.search_input.text().strip()
+
+        # Clear previous highlights and current match indicator
+        self.clear_search_highlights()
+        self.clear_current_match_indicator()
+        self.search_matches = []
+        self.current_match_index = -1
+
+        if not search_text:
+            self.match_label.setText("No matches")
+            return
+
+        # Search only in Path column (column 1) - case-insensitive
+        search_lower = search_text.lower()
+        path_column = 1
+
+        for row in range(self.table.rowCount()):
+            item = self.table.item(row, path_column)
+            if item and search_lower in item.text().lower():
+                # Highlight matching path cell with yellow
+                item.setBackground(QColor(255, 255, 150))  # Yellow highlight
+                self.search_matches.append(row)
+
+        # Update match counter
+        if self.search_matches:
+            self.match_label.setText(f"{len(self.search_matches)} matches")
+            self.current_match_index = 0
+            self.highlight_current_match()
+        else:
+            self.match_label.setText("No matches")
+
+    def clear_current_match_indicator(self):
+        """Remove the bright highlight from the current match"""
+        if not self.search_matches or self.current_match_index < 0:
+            return
+
+        path_column = 1
+        row = self.search_matches[self.current_match_index]
+        item = self.table.item(row, path_column)
+        if item:
+            # Return to regular yellow highlight
+            item.setBackground(QColor(255, 255, 150))
+
+    def highlight_current_match(self):
+        """Highlight the current match and scroll to it"""
+        if not self.search_matches or self.current_match_index < 0:
+            return
+
+        path_column = 1
+        row = self.search_matches[self.current_match_index]
+
+        # Clear any existing row selection
+        self.table.clearSelection()
+
+        # Make the current match stand out with a brighter highlight (orange)
+        item = self.table.item(row, path_column)
+        if item:
+            item.setBackground(QColor(255, 200, 100))  # Orange highlight for current match
+
+        # Scroll to the row
+        self.table.scrollToItem(item)
+
+        # Update match label with position
+        self.match_label.setText(
+            f"Match {self.current_match_index + 1} of {len(self.search_matches)}"
+        )
+
+    def find_next(self):
+        """Navigate to the next search match"""
+        if not self.search_matches:
+            return
+
+        # Clear current match indicator before moving
+        self.clear_current_match_indicator()
+
+        self.current_match_index = (self.current_match_index + 1) % len(self.search_matches)
+        self.highlight_current_match()
+
+    def find_previous(self):
+        """Navigate to the previous search match"""
+        if not self.search_matches:
+            return
+
+        # Clear current match indicator before moving
+        self.clear_current_match_indicator()
+
+        self.current_match_index = (self.current_match_index - 1) % len(self.search_matches)
+        self.highlight_current_match()
 
 
 def run_gui():
