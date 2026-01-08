@@ -5,11 +5,12 @@ PyQt6-based GUI for viewing and managing PATH.
 """
 
 import sys
+import os
 from datetime import datetime
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QTableWidget, QTableWidgetItem,
     QVBoxLayout, QWidget, QStatusBar, QHeaderView, QLabel, QHBoxLayout,
-    QMenuBar, QMessageBox, QLineEdit, QPushButton, QFrame
+    QMenuBar, QMessageBox, QLineEdit, QPushButton, QFrame, QDialog, QTextEdit
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QFont, QAction
@@ -226,6 +227,19 @@ class PathManagerWindow(QMainWindow):
         # Help Menu
         help_menu = menubar.addMenu("&Help")
 
+        quick_ref_action = QAction("&Quick Reference Guide", self)
+        quick_ref_action.setStatusTip("Open Quick Reference Guide")
+        quick_ref_action.setShortcut("F1")
+        quick_ref_action.triggered.connect(self.show_quick_reference)
+        help_menu.addAction(quick_ref_action)
+
+        changelog_action = QAction("&Change Log", self)
+        changelog_action.setStatusTip("View version history and changes")
+        changelog_action.triggered.connect(self.show_changelog)
+        help_menu.addAction(changelog_action)
+
+        help_menu.addSeparator()
+
         about_action = QAction("&About PathManager", self)
         about_action.setStatusTip("About PathManager")
         about_action.triggered.connect(self.show_about_dialog)
@@ -234,8 +248,8 @@ class PathManagerWindow(QMainWindow):
     def show_about_dialog(self):
         """Display the About dialog"""
         about_text = """<h2>PathManager</h2>
-        <p><b>Version:</b> 0.2.0</p>
-        <p><b>Date:</b> 2026-01-08</p>
+        <p><b>Version:</b> v0.2.0a</p>
+        <p><b>Date:</b> 2026-01-08 11:32 AM CST</p>
         <p><b>Status:</b> Phase 1 Complete - Foundation & Basic GUI</p>
         <br>
         <p>A Python utility for viewing and managing system PATH environment variables.</p>
@@ -262,6 +276,83 @@ class PathManagerWindow(QMainWindow):
         """
 
         QMessageBox.about(self, "About PathManager", about_text)
+
+    def show_quick_reference(self):
+        """Display the Quick Reference Guide in a dialog"""
+        dialog = self.create_markdown_dialog("Quick Reference Guide", "QUICK_REFERENCE.md")
+        dialog.exec()
+
+    def show_changelog(self):
+        """Display the Change Log in a dialog"""
+        dialog = self.create_markdown_dialog("Change Log", "CHANGELOG.md")
+        dialog.exec()
+
+    def create_markdown_dialog(self, title: str, filename: str) -> QDialog:
+        """Create a dialog to display markdown files"""
+        dialog = QDialog(self)
+        dialog.setWindowTitle(title)
+        dialog.setGeometry(100, 100, 900, 700)
+        
+        layout = QVBoxLayout(dialog)
+        
+        # Create text widget for content
+        text_widget = QTextEdit()
+        text_widget.setReadOnly(True)
+        
+        # Try to load the markdown file
+        try:
+            # Get the project root directory (where pathmanager.py is)
+            current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            file_path = os.path.join(current_dir, filename)
+            
+            if os.path.exists(file_path):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    text_widget.setMarkdown(content)
+            else:
+                text_widget.setPlainText(f"Error: Could not find {filename}\n\nExpected location: {file_path}")
+        except Exception as e:
+            text_widget.setPlainText(f"Error reading {filename}: {str(e)}")
+        
+        # Configure text widget appearance
+        text_widget.setStyleSheet("""
+            QTextEdit {
+                font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+                font-size: 10pt;
+                background-color: #ffffff;
+                color: #000000;
+                border: 1px solid #cccccc;
+                padding: 8px;
+            }
+        """)
+        
+        layout.addWidget(text_widget)
+        
+        # Add close button
+        close_button = QPushButton("Close")
+        close_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f0f0f0;
+                border: 1px solid #cccccc;
+                padding: 8px 16px;
+                border-radius: 4px;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background-color: #e0e0e0;
+            }
+            QPushButton:pressed {
+                background-color: #d0d0d0;
+            }
+        """)
+        close_button.clicked.connect(dialog.accept)
+        
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(close_button)
+        layout.addLayout(button_layout)
+        
+        return dialog
 
     def setup_table(self):
         """Set up the table widget structure"""
@@ -360,7 +451,7 @@ class PathManagerWindow(QMainWindow):
         self.statusBar.showMessage(status_text)
 
         # Add subdued version datestamp on the right
-        version_label = QLabel("v0.2.0 | 2026-01-08")
+        version_label = QLabel("v0.2.0a 2026-01-08 1132 CST")
         version_label.setStyleSheet("color: #888888; font-size: 9pt;")
         self.statusBar.addPermanentWidget(version_label)
 

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0a] - Thu 08 Jan 2026 11:32:00 AM CST
+
+### Added
+- Quick Reference Guide (`QUICK_REFERENCE.md`) with comprehensive command and GUI documentation
+- Help menu items in GUI for Quick Reference Guide (F1) and Change Log
+- Markdown-based documentation viewer in GUI with proper formatting
+- Updated version to v0.2.0a in GUI status bar and About dialog
+
+### Changed
+- Enhanced Help menu accessibility with keyboard shortcuts (F1 for Quick Reference)
+- Improved user documentation accessibility through integrated GUI help system
+
 ## [0.2.0] - 2026-01-08
 
 ### Added
