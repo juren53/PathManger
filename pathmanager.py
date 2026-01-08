@@ -1,6 +1,26 @@
 import os
+import platform
+import socket
+from datetime import datetime
 
 def print_environment_paths():
+    # Get system information
+    machine_name = socket.gethostname()
+    os_name = platform.system()
+    os_version = platform.release()
+    hardware = platform.machine()
+    current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Print system information header
+    print(f"{'=' * 60}")
+    print(f"PathManager - System Information")
+    print(f"{'=' * 60}")
+    print(f"Machine Name: {machine_name}")
+    print(f"Operating System: {os_name} {os_version}")
+    print(f"Hardware: {hardware}")
+    print(f"Date: {current_date}")
+    print(f"{'=' * 60}\n")
+
     # 1. Extract the 'PATH' string from environment variables
     # We use .get() to avoid an error if PATH is somehow missing
     path_string = os.environ.get('PATH', '')
