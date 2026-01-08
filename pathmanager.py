@@ -10,7 +10,7 @@ Usage:
     python pathmanager.py --gui     # Run in GUI mode
     python pathmanager.py --help    # Show help message
 
-Version: v0.2.0b 2026-01-08 1400 CST
+Version: v0.2.0c 2026-01-08 1645 CST
 Author: Jim U'Ren
 License: Personal and educational use
 """
@@ -31,9 +31,15 @@ def main():
         help="Launch the graphical user interface (requires PyQt6)"
     )
     parser.add_argument(
+        "-l", "--list",
+        action="store_true",
+        dest="show_all",
+        help="Show all PATH entries (default: show first 20)"
+    )
+    parser.add_argument(
         "--version",
         action="version",
-        version="PathManager v0.2.0b 2026-01-08 1400 CST"
+        version="PathManager v0.2.0c 2026-01-08 1645 CST"
     )
 
     args = parser.parse_args()
@@ -55,7 +61,7 @@ def main():
         # Default: CLI mode
         try:
             from cli.cli_main import run_cli
-            return run_cli()
+            return run_cli(show_all=args.show_all)
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
             return 1

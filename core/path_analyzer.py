@@ -155,25 +155,34 @@ class PathAnalyzer:
         return self.os_name == "Windows"
 
     def format_system_info_header(self) -> str:
-        """Format system information as a text header"""
+        """Format system information as a compact text header"""
+        from core import __version__
         info = self.get_system_info()
         header = f"{'=' * 60}\n"
-        header += f"PathManager - System Information\n"
+        header += f"PathManager - System Information    [ v{__version__} ]\n"
         header += f"{'=' * 60}\n"
-        header += f"Machine Name: {info['machine_name']}\n"
-        header += f"Operating System: {info['os_name']} {info['os_version']}\n"
-        header += f"Hardware: {info['hardware']}\n"
-        header += f"Date: {info['timestamp']}\n"
+        # Compact two-column format
+        header += f"Machine Name: {info['machine_name']:<20}Operating System: {info['os_name']} {info['os_version']}\n"
+        header += f"Hardware: {info['hardware']:<24}Date: {info['timestamp']}\n"
         header += f"{'=' * 60}\n"
         return header
 
-    def format_path_list(self) -> str:
-        """Format PATH entries as numbered list"""
+    def format_path_list(self, limit: int = None) -> str:
+        """
+        Format PATH entries as numbered list
+
+        Args:
+            limit: Maximum number of entries to display (None = all entries)
+        """
+        total_count = self.get_entry_count()
+        display_count = min(limit, total_count) if limit else total_count
+
         output = f"{'#' * 20}\n"
-        output += f"System PATH Entries ({self.get_entry_count()} total)\n"
+        output += f"System PATH Entries ({total_count} total)\n"
         output += f"{'#' * 20}\n\n"
 
-        for entry in self.entries:
+        # Display entries up to the limit
+        for entry in self.entries[:display_count]:
             # Add source indicator for Windows
             source_indicator = ""
             if self.is_windows() and entry.source != "environment":
@@ -183,5 +192,9 @@ class PathAnalyzer:
             exists_indicator = "" if entry.exists else " [NOT FOUND]"
 
             output += f"{entry.index + 1:02d} | {entry.path}{source_indicator}{exists_indicator}\n"
+
+        # Add message if list was truncated
+        if limit and total_count > limit:
+            output += f"\n[ showing first {display_count} of {total_count} PATH entries ]\n"
 
         return output

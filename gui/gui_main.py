@@ -255,8 +255,8 @@ class PathManagerWindow(QMainWindow):
     def show_about_dialog(self):
         """Display the About dialog"""
         about_text = """<h2>PathManager</h2>
-        <p><b>Version:</b> v0.2.0b</p>
-        <p><b>Date:</b> 2026-01-08 2:00 PM CST</p>
+        <p><b>Version:</b> v0.2.0c</p>
+        <p><b>Date:</b> 2026-01-08 4:45 PM CST</p>
         <p><b>Status:</b> Phase 1 Complete - Foundation & Basic GUI</p>
         <br>
         <p>A Python utility for viewing and managing system PATH environment variables.</p>
@@ -458,7 +458,7 @@ class PathManagerWindow(QMainWindow):
         self.statusBar.showMessage(status_text)
 
         # Add subdued version datestamp on the right
-        version_label = QLabel("v0.2.0b 2026-01-08 1400 CST")
+        version_label = QLabel("v0.2.0c 2026-01-08 1645 CST")
         version_label.setStyleSheet("color: #888888; font-size: 9pt;")
         self.statusBar.addPermanentWidget(version_label)
 

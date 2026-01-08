@@ -8,8 +8,13 @@ import sys
 from core.path_analyzer import PathAnalyzer
 
 
-def run_cli():
-    """Run the CLI version of PathManager"""
+def run_cli(show_all: bool = False):
+    """
+    Run the CLI version of PathManager
+
+    Args:
+        show_all: If True, show all PATH entries. If False, show first 20.
+    """
     try:
         # Create analyzer
         analyzer = PathAnalyzer()
@@ -17,15 +22,17 @@ def run_cli():
         # Print system information header
         print(analyzer.format_system_info_header())
 
-        # Print PATH entries
-        print(analyzer.format_path_list())
+        # Print PATH entries (limit to 20 unless show_all is True)
+        limit = None if show_all else 20
+        print(analyzer.format_path_list(limit=limit))
 
         # Print summary for Windows
         if analyzer.is_windows():
             print(f"\nPath Summary:")
-            print(f"  User PATH entries: {len(analyzer.get_user_path())}")
-            print(f"  System PATH entries: {len(analyzer.get_system_path())}")
-            print(f"  Combined PATH entries: {analyzer.get_entry_count()}")
+            user_count = len(analyzer.get_user_path())
+            system_count = len(analyzer.get_system_path())
+            combined_count = analyzer.get_entry_count()
+            print(f"  User PATH entries: {user_count:<8}System PATH entries: {system_count:<8}Combined PATH entries: {combined_count}")
             print(f"\nLegend: [U] = User PATH, [S] = System PATH")
 
     except Exception as e:

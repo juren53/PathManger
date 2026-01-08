@@ -7,10 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0c] - Wed 08 Jan 2026 04:45:00 PM CST
+
+### Changed
+- CLI default output now shows only first 20 PATH entries for better readability
+- Compact system information header in two-column format to save space
+- Compact Path Summary format with all counts on one line
+- Version number now displayed in CLI title: "PathManager - System Information [ v0.2.0c ]"
+
+### Added
+- `-l` / `--list` command-line flag to show all PATH entries (bypasses 20-entry limit)
+- Message indicator when PATH list is truncated: "[ showing first 20 of X PATH entries ]"
+
+### Notes
+- Executable rebuilt with CLI improvements and v0.2.0c version
+
 ## [0.2.0b] - Thu 08 Jan 2026 02:00:00 PM CST
 
 ### Added
 - Window geometry persistence: GUI now saves and restores window size and position between sessions
+- Windows executable build: Single-file `PathManager.exe` (35 MB) compiled with PyInstaller
+  - Application icon included (icons/ICON_PathMgr.ico)
+  - All dependencies bundled (no Python installation required)
+  - Supports both CLI and GUI modes
 
 ### Changed
 - Improved Source column contrast in GUI table with bold dark backgrounds and off-white text
