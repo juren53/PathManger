@@ -1,0 +1,10 @@
+# PathManager Requirements
+# Python 3.7+
+
+# GUI Framework
+PyQt6>=6.6.0
+
+# Windows registry access (included in Python standard library on Windows)
+# winreg - standard library
+
+# Future dependencies will be added as needed

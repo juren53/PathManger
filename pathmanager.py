@@ -1,49 +1,65 @@
-import os
-import platform
-import socket
-from datetime import datetime
+#!/usr/bin/env python3
+"""
+PathManager - PATH Environment Variable Manager
 
-def print_environment_paths():
-    # Get system information
-    machine_name = socket.gethostname()
-    os_name = platform.system()
-    os_version = platform.release()
-    hardware = platform.machine()
-    current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+A cross-platform tool for viewing and managing system PATH variables.
+Supports both CLI and GUI modes.
 
-    # Print system information header
-    print(f"{'=' * 60}")
-    print(f"PathManager - System Information")
-    print(f"{'=' * 60}")
-    print(f"Machine Name: {machine_name}")
-    print(f"Operating System: {os_name} {os_version}")
-    print(f"Hardware: {hardware}")
-    print(f"Date: {current_date}")
-    print(f"{'=' * 60}\n")
+Usage:
+    python pathmanager.py           # Run in CLI mode (default)
+    python pathmanager.py --gui     # Run in GUI mode
+    python pathmanager.py --help    # Show help message
 
-    # 1. Extract the 'PATH' string from environment variables
-    # We use .get() to avoid an error if PATH is somehow missing
-    path_string = os.environ.get('PATH', '')
+Version: 0.2.0
+Author: Jim U'Ren
+License: Personal and educational use
+"""
 
-    if not path_string:
-        print("No PATH variable found.")
-        return
+import sys
+import argparse
 
-    # 2. Determine the separator based on the Operating System
-    # Windows uses ';' while Linux/macOS uses ':'
-    separator = os.pathsep
 
-    # 3. Split the string into a list
-    path_list = path_string.split(separator)
+def main():
+    """Main entry point for PathManager"""
+    parser = argparse.ArgumentParser(
+        description="PathManager - View and manage your system PATH environment variable",
+        epilog="For more information, see README.md"
+    )
+    parser.add_argument(
+        "--gui",
+        action="store_true",
+        help="Launch the graphical user interface (requires PyQt6)"
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="PathManager 0.2.0"
+    )
 
-    # 4. Print the formatted list
-    print(f"{'#' * 20}")
-    print(f"System PATH Entries ({len(path_list)} total)")
-    print(f"{'#' * 20}\n")
+    args = parser.parse_args()
 
-    for i, path in enumerate(path_list, 1):
-        # We use an f-string to pad the numbers for better alignment
-        print(f"{i:02d} | {path}")
+    # Launch appropriate interface
+    if args.gui:
+        try:
+            from gui.gui_main import run_gui
+            return run_gui()
+        except ImportError as e:
+            print("Error: PyQt6 is required for GUI mode.", file=sys.stderr)
+            print("Install it with: pip install PyQt6", file=sys.stderr)
+            print(f"Details: {e}", file=sys.stderr)
+            return 1
+        except Exception as e:
+            print(f"Error launching GUI: {e}", file=sys.stderr)
+            return 1
+    else:
+        # Default: CLI mode
+        try:
+            from cli.cli_main import run_cli
+            return run_cli()
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+
 
 if __name__ == "__main__":
-    print_environment_paths()
+    sys.exit(main())
