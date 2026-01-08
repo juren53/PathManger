@@ -1,0 +1,13 @@
+Check_path
+
+How it works:
+os.environ: This is a dictionary-like object that contains all your environment variables.
+
+os.pathsep: This is a built-in Python constant that automatically knows whether to use a semicolon or a colon based on whether you are running the script in Windows or Linux.
+
+enumerate(path_list, 1): This allows us to loop through the list while keeping a counter that starts at 1, making the output easy to read.
+
+Running it on Linux Mint:
+If you saved this as check_path.py, you would run it in your terminal with: python3 check_path.py
+
+Would you like me to modify the script so it also checks if each directory in your PATH actually exists on your hard drive?
