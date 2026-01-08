@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced Help menu accessibility with keyboard shortcuts (F1 for Quick Reference)
 - Improved user documentation accessibility through integrated GUI help system
 
-## [0.2.0] - 2026-01-08  11:45 CST
+## [0.2.0] - 2026-01-08  10:45 AM CST
 
 ### Added
 - **Phase 1: Foundation & Basic GUI - Complete**
@@ -82,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI and GUI both use shared PathAnalyzer for consistency
 - PyQt6 Fusion style for modern cross-platform appearance
 
-## [0.1.0] - 2026-01-08  10:35 CST
+## [0.1.0] - 2026-01-08  09:35 AM CST
 
 ### Added
 - Initial release of PathManager
