@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- System information header displaying machine name, OS, hardware architecture, and timestamp
+- README.md with comprehensive project documentation
+- CHANGELOG.md to track version history
+- Project_Rules.md defining project conventions (timezone, versioning)
+
+### Changed
+- Renamed `check-path.py` to `pathmanager.py` for better project alignment
+- Enhanced output with formatted system information section
+
 ## [0.1.0] - 2026-01-08
 
 ### Added
