@@ -32,7 +32,7 @@ python pathmanager.py --version
 ```
 
 ### Quick Check
-- **Current Version**: v0.2.0
+- **Current Version**: v0.2.0d
 - **Status**: Phase 1 complete (Basic viewing & GUI)
 - **Requirements**: Python 3.7+, PyQt6 for GUI
 
@@ -45,7 +45,7 @@ python pathmanager.py --version
 | `python pathmanager.py` | Show PATH in CLI | `python pathmanager.py` | Default mode |
 | `python pathmanager.py --gui` | Launch GUI interface | `python pathmanager.py --gui` | Requires PyQt6 |
 | `python pathmanager.py --help` | Show help | `python pathmanager.py --help` | All options |
-| `python pathmanager.py --version` | Show version | `python pathmanager.py --version` | Current: v0.2.0 |
+| `python pathmanager.py --version` | Show version | `python pathmanager.py --version` | Current: v0.2.0d |
 
 ### Upcoming Commands (Phase 2+)
 | Command | Status | Function |
@@ -64,7 +64,7 @@ python pathmanager.py --version
 
 ### Main Window Layout
 ```
-┌─ PathManager v0.2.0 ──────────────────────□─×┐
+┌─ PathManager v0.2.0d ──────────────────────□─×┐
 │ System: Windows 11 | Machine: YOUR-PC            │
 ├─────────────────────────────────────────────────┤
 │ Toolbar: [Refresh] [Settings] [Help]            │
@@ -126,7 +126,7 @@ python pathmanager.py --gui
 ```
 
 ### 👨‍💻 System Administrators
-**Current Limitations (v0.2.0):**
+**Current Limitations (v0.2.0d):**
 - View-only (no modifications yet)
 - No admin elevation required for viewing
 - Both User and System PATH visible
@@ -189,7 +189,7 @@ Solution: Run as administrator (for future modification features)
 
 ## 🚀 Feature Status by Phase
 
-### ✅ Phase 1 - Complete (v0.2.0)
+### ✅ Phase 1 - Complete (v0.2.0d)
 - **View PATH** in CLI and GUI
 - **Windows registry** integration
 - **User vs System PATH** distinction
@@ -329,7 +329,7 @@ python pathmanager.py --gui
 - [Python os.path Module](https://docs.python.org/3/library/os.path.html)
 
 ### Version Information
-- **Current Version**: v0.2.0 (Phase 1 Complete)
+- **Current Version**: v0.2.0d (Phase 1 Complete)
 - **Next Release**: v0.3.0 (Phase 2 - Problem Detection)
 - **Release Schedule**: Approximately every 2-3 weeks
 - **All timestamps use Central Time (CST/CDT)**
@@ -356,6 +356,6 @@ python pathmanager.py --gui
 
 ---
 
-**PathManager v0.2.0** | Phase 1 Complete | Created 2026-01-08 | Central Time USA (CST)
+**PathManager v0.2.0d** | Phase 1 Complete | Updated 2026-01-09 | Central Time USA (CST)
 
 *For the latest updates and development progress, see the project README and CHANGELOG.*

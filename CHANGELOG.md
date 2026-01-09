@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0d] - Thu 09 Jan 2026 02:00:00 PM CST
+
+### Added
+- 'Q' hotkey to quickly quit the GUI application
+  - Press 'Q' anywhere in the main window to close PathManager
+  - Intelligent behavior: disabled when typing in search field to allow typing 'q' in searches
+  - Works alongside existing Ctrl+Q menu shortcut
+
 ## [0.2.0c] - Wed 08 Jan 2026 04:45:00 PM CST
 
 ### Changed

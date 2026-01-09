@@ -1,8 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 # PathManager - PyInstaller spec file for Windows executable
-# Version: 0.2.0c
-# Updated: 2026-01-08
+# Version: 0.2.0d
+# Updated: 2026-01-09
 
 a = Analysis(
     ['pathmanager.py'],

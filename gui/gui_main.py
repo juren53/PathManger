@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QMenuBar, QMessageBox, QLineEdit, QPushButton, QFrame, QDialog, QTextEdit
 )
 from PyQt6.QtCore import Qt, QSettings
-from PyQt6.QtGui import QColor, QFont, QAction
+from PyQt6.QtGui import QColor, QFont, QAction, QKeySequence, QShortcut
 from core.path_analyzer import PathAnalyzer
 
 
@@ -41,6 +41,11 @@ class PathManagerWindow(QMainWindow):
 
         # Create menu bar
         self.create_menu_bar()
+
+        # Add Q hotkey to quit (with smart context handling)
+        quit_shortcut = QShortcut(QKeySequence("Q"), self)
+        quit_shortcut.setContext(Qt.ShortcutContext.ApplicationShortcut)
+        quit_shortcut.activated.connect(self.handle_quit_shortcut)
 
         # Create central widget and layout
         central_widget = QWidget()
@@ -255,8 +260,8 @@ class PathManagerWindow(QMainWindow):
     def show_about_dialog(self):
         """Display the About dialog"""
         about_text = """<h2>PathManager</h2>
-        <p><b>Version:</b> v0.2.0c</p>
-        <p><b>Date:</b> 2026-01-08 4:45 PM CST</p>
+        <p><b>Version:</b> v0.2.0d</p>
+        <p><b>Date:</b> 2026-01-09 2:00 PM CST</p>
         <p><b>Status:</b> Phase 1 Complete - Foundation & Basic GUI</p>
         <br>
         <p>A Python utility for viewing and managing system PATH environment variables.</p>
@@ -458,7 +463,7 @@ class PathManagerWindow(QMainWindow):
         self.statusBar.showMessage(status_text)
 
         # Add subdued version datestamp on the right
-        version_label = QLabel("v0.2.0c 2026-01-08 1645 CST")
+        version_label = QLabel("v0.2.0d 2026-01-09 1400 CST")
         version_label.setStyleSheet("color: #888888; font-size: 9pt;")
         self.statusBar.addPermanentWidget(version_label)
 
@@ -579,6 +584,15 @@ class PathManagerWindow(QMainWindow):
 
         self.current_match_index = (self.current_match_index - 1) % len(self.search_matches)
         self.highlight_current_match()
+
+    def handle_quit_shortcut(self):
+        """Handle Q key press to quit - but not when typing in search"""
+        # Don't quit if the search input field has focus (user is typing)
+        if self.search_input.hasFocus():
+            # Let the Q key go through to the search field
+            return
+        # Otherwise, close the application
+        self.close()
 
     def closeEvent(self, event):
         """Save window geometry when closing"""
