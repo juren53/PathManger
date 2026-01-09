@@ -6,6 +6,7 @@ PyQt6-based GUI for viewing and managing PATH.
 
 import sys
 import os
+import platform
 from datetime import datetime
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QTableWidget, QTableWidgetItem,
@@ -239,6 +240,13 @@ class PathManagerWindow(QMainWindow):
         # Help Menu
         help_menu = menubar.addMenu("&Help")
 
+        overview_action = QAction("&Overview", self)
+        overview_action.setStatusTip("View PathManager overview and documentation")
+        overview_action.triggered.connect(self.show_overview)
+        help_menu.addAction(overview_action)
+
+        help_menu.addSeparator()
+
         quick_ref_action = QAction("&Quick Reference Guide", self)
         quick_ref_action.setStatusTip("Open Quick Reference Guide")
         quick_ref_action.setShortcut("F1")
@@ -289,6 +297,11 @@ class PathManagerWindow(QMainWindow):
 
         QMessageBox.about(self, "About PathManager", about_text)
 
+    def show_overview(self):
+        """Display the Overview documentation in a dialog"""
+        dialog = self.create_markdown_dialog("PathManager Overview", "README.md")
+        dialog.exec()
+
     def show_quick_reference(self):
         """Display the Quick Reference Guide in a dialog"""
         dialog = self.create_markdown_dialog("Quick Reference Guide", "QUICK_REFERENCE.md")
@@ -299,13 +312,47 @@ class PathManagerWindow(QMainWindow):
         dialog = self.create_markdown_dialog("Change Log", "CHANGELOG.md")
         dialog.exec()
 
+    def is_dark_theme(self) -> bool:
+        """Detect if the system is using dark theme"""
+        try:
+            # Try to get system palette colors
+            palette = QApplication.palette()
+            window_color = palette.color(QPalette.ColorRole.Window)
+            window_text_color = palette.color(QPalette.ColorRole.WindowText)
+            
+            # Calculate luminance (simple formula)
+            def get_luminance(color):
+                return (0.299 * color.red() + 0.587 * color.green() + 0.114 * color.blue()) / 255
+            
+            bg_luminance = get_luminance(window_color)
+            text_luminance = get_luminance(window_text_color)
+            
+            # If background is darker than text, it's likely a dark theme
+            return bg_luminance < text_luminance
+        except:
+            # Fallback to Windows registry check on Windows
+            if platform.system() == "Windows":
+                try:
+                    import winreg
+                    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                                      r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize") as key:
+                        # 0 = light, 1 = dark
+                        apps_use_light_theme, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
+                        return apps_use_light_theme == 0
+                except:
+                    pass
+            return False  # Default to light theme if detection fails
+
     def create_markdown_dialog(self, title: str, filename: str) -> QDialog:
-        """Create a dialog to display markdown files"""
+        """Create a dialog to display markdown files with proper theming"""
         dialog = QDialog(self)
         dialog.setWindowTitle(title)
         dialog.setGeometry(100, 100, 900, 700)
         
         layout = QVBoxLayout(dialog)
+        
+        # Detect system theme
+        is_dark = self.is_dark_theme()
         
         # Create text widget for content
         text_widget = QTextEdit()
@@ -326,36 +373,149 @@ class PathManagerWindow(QMainWindow):
         except Exception as e:
             text_widget.setPlainText(f"Error reading {filename}: {str(e)}")
         
-        # Configure text widget appearance
-        text_widget.setStyleSheet("""
-            QTextEdit {
+        # Define theme colors
+        if is_dark:
+            # Dark theme colors
+            bg_color = "#2d2d30"
+            text_color = "#f1f1f1"
+            border_color = "#3f3f46"
+            heading_color = "#ffffff"
+            subheading_color = "#e1e1e1"
+            code_bg = "#1e1e1e"
+            code_color = "#569cd6"
+            border_light = "#404040"
+            link_color = "#4fc3f7"
+            quote_color = "#8c8c8c"
+            table_border = "#404040"
+            table_header_bg = "#383838"
+            button_bg = "#3f3f46"
+            button_hover = "#4a4a52"
+            button_pressed = "#55555c"
+        else:
+            # Light theme colors
+            bg_color = "#ffffff"
+            text_color = "#000000"
+            border_color = "#cccccc"
+            heading_color = "#1a252f"
+            subheading_color = "#24292e"
+            code_bg = "#f6f8fa"
+            code_color = "#d73a49"
+            border_light = "#e1e4e8"
+            link_color = "#0366d6"
+            quote_color = "#6a737d"
+            table_border = "#dfe2e5"
+            table_header_bg = "#f6f8fa"
+            button_bg = "#f0f0f0"
+            button_hover = "#e0e0e0"
+            button_pressed = "#d0d0d0"
+        
+        # Configure text widget appearance with theme-aware styling
+        text_widget.setStyleSheet(f"""
+            QTextEdit {{
                 font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
                 font-size: 10pt;
-                background-color: #ffffff;
-                color: #000000;
-                border: 1px solid #cccccc;
+                background-color: {bg_color};
+                color: {text_color};
+                border: 1px solid {border_color};
+                padding: 12px;
+                line-height: 1.4;
+            }}
+            QTextEdit h1, QTextEdit h2, QTextEdit h3, QTextEdit h4, QTextEdit h5, QTextEdit h6 {{
+                color: {heading_color};
+                font-weight: 600;
+                margin-top: 16px;
+                margin-bottom: 8px;
+            }}
+            QTextEdit h1 {{
+                font-size: 18pt;
+                color: {heading_color};
+                border-bottom: 2px solid {border_light};
+                padding-bottom: 4px;
+            }}
+            QTextEdit h2 {{
+                font-size: 14pt;
+                color: {subheading_color};
+                border-bottom: 1px solid {border_light};
+                padding-bottom: 2px;
+            }}
+            QTextEdit h3 {{
+                font-size: 12pt;
+                color: {subheading_color};
+            }}
+            QTextEdit code {{
+                background-color: {code_bg};
+                color: {code_color};
+                padding: 2px 4px;
+                border-radius: 3px;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                font-size: 9pt;
+            }}
+            QTextEdit pre {{
+                background-color: {code_bg};
+                border: 1px solid {border_light};
+                border-radius: 6px;
                 padding: 8px;
-            }
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                font-size: 9pt;
+                overflow-x: auto;
+            }}
+            QTextEdit blockquote {{
+                border-left: 4px solid {border_light};
+                margin: 0 0 16px 0;
+                padding: 0 16px;
+                color: {quote_color};
+            }}
+            QTextEdit a {{
+                color: {link_color};
+                text-decoration: none;
+            }}
+            QTextEdit a:hover {{
+                text-decoration: underline;
+            }}
+            QTextEdit ul, QTextEdit ol {{
+                margin: 8px 0;
+                padding-left: 20px;
+            }}
+            QTextEdit li {{
+                margin: 4px 0;
+            }}
+            QTextEdit table {{
+                border-collapse: collapse;
+                margin: 8px 0;
+            }}
+            QTextEdit td, QTextEdit th {{
+                border: 1px solid {table_border};
+                padding: 6px 8px;
+            }}
+            QTextEdit th {{
+                background-color: {table_header_bg};
+                font-weight: 600;
+            }}
         """)
         
         layout.addWidget(text_widget)
         
-        # Add close button
+        # Add close button with theme-aware styling
         close_button = QPushButton("Close")
-        close_button.setStyleSheet("""
-            QPushButton {
-                background-color: #f0f0f0;
-                border: 1px solid #cccccc;
+        close_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {button_bg};
+                border: 1px solid {border_color};
                 padding: 8px 16px;
                 border-radius: 4px;
                 min-width: 80px;
-            }
-            QPushButton:hover {
-                background-color: #e0e0e0;
-            }
-            QPushButton:pressed {
-                background-color: #d0d0d0;
-            }
+                font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+                font-size: 9pt;
+                color: {text_color};
+            }}
+            QPushButton:hover {{
+                background-color: {button_hover};
+                border-color: {border_light};
+            }}
+            QPushButton:pressed {{
+                background-color: {button_pressed};
+                border-color: {border_light};
+            }}
         """)
         close_button.clicked.connect(dialog.accept)
         

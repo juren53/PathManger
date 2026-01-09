@@ -1,13 +1,164 @@
-Check_path
+# How PathManager Works
 
-How it works:
-os.environ: This is a dictionary-like object that contains all your environment variables.
+## Introduction & Current Status
 
-os.pathsep: This is a built-in Python constant that automatically knows whether to use a semicolon or a colon based on whether you are running the script in Windows or Linux.
+PathManager is a sophisticated cross-platform tool for viewing and managing system PATH environment variables. It supports both CLI and GUI interfaces that share a common business logic core.
 
-enumerate(path_list, 1): This allows us to loop through the list while keeping a counter that starts at 1, making the output easy to read.
+**Current Status**: Phase 1 complete (v0.2.0) - Foundation & Basic GUI
+**Architecture**: Modular three-layer design with shared business logic
 
-Running it on Linux Mint:
-If you saved this as check_path.py, you would run it in your terminal with: python3 check_path.py
+## Architecture Overview
 
-Would you like me to modify the script so it also checks if each directory in your PATH actually exists on your hard drive?
+PathManager uses a clean three-layer modular architecture:
+
+```
+pathmanager/
+├── core/                      # Business Logic Layer
+│   ├── path_analyzer.py      # PathAnalyzer class - core PATH operations
+│   └── __init__.py
+├── cli/                       # CLI Presentation Layer
+│   ├── cli_main.py           # Command-line interface
+│   └── __init__.py
+├── gui/                       # GUI Presentation Layer
+│   ├── gui_main.py           # PyQt6 main window
+│   ├── widgets/              # Custom widgets (future)
+│   ├── dialogs/              # Dialog windows (future)
+│   └── __init__.py
+└── pathmanager.py            # Entry point with argument parsing
+```
+
+## How It Works - Core Components
+
+### PathAnalyzer Class (core/path_analyzer.py)
+The heart of PathManager that handles all PATH-related operations:
+
+- **Initialization**: Auto-detects OS and loads appropriate PATH data
+- **Windows Support**: Reads from Windows registry:
+  - User PATH: `HKEY_CURRENT_USER\Environment`
+  - System PATH: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment`
+- **Unix Support**: Reads from environment variable
+- **Data Processing**: Creates structured PathEntry objects with metadata
+
+### PathEntry Class
+Represents a single PATH entry with rich metadata:
+- `path`: The directory path
+- `index`: Position in the combined PATH
+- `source`: "user", "system", or "environment"
+- `exists`: Boolean indicating if directory exists
+
+### Entry Point (pathmanager.py)
+Handles command-line argument parsing and routes to appropriate interface:
+- Default: CLI mode
+- `--gui`: Launches GUI interface
+- `--help`: Shows usage information
+- `--version`: Displays version info
+
+## Interface Options
+
+### CLI Mode (cli/cli_main.py)
+Text-based interface that provides:
+- System information header
+- Numbered PATH entries with source indicators ([U], [S])
+- Directory existence status ([NOT FOUND])
+- Summary statistics (Windows only)
+- Configurable output limits (default: first 20 entries)
+
+### GUI Mode (gui/gui_main.py)
+PyQt6-based graphical interface featuring:
+- Table view with sortable columns
+- Color-coded rows (System=light blue, User=light green)
+- Status indicators (✓ OK, ✗ Not Found)
+- Search functionality with keyboard navigation
+- Resizable window with persistent settings
+- Menu bar with quit option
+- Status bar showing entry counts
+
+## Key Features
+
+### Cross-Platform Compatibility
+- **Windows**: Registry-based PATH reading with User/System distinction
+- **Linux/macOS**: Environment variable reading
+- **Automatic OS detection** and appropriate method selection
+
+### Advanced PATH Analysis
+- **Duplicate detection** (planned for Phase 2)
+- **Directory existence verification**
+- **Source tracking** (User vs System on Windows)
+- **Path ordering analysis**
+
+### User Experience
+- **Fast startup** with efficient data loading
+- **Intuitive interfaces** for both technical and non-technical users
+- **Consistent behavior** across CLI and GUI modes
+- **Error handling** with graceful fallbacks
+
+## Usage Examples
+
+### CLI Mode
+```bash
+# Basic usage (shows first 20 entries)
+python pathmanager.py
+
+# Show all PATH entries
+python pathmanager.py -l
+python pathmanager.py --list
+
+# Show help
+python pathmanager.py --help
+
+# Show version
+python pathmanager.py --version
+```
+
+### GUI Mode
+```bash
+# Launch graphical interface
+python pathmanager.py --gui
+```
+
+## Technical Implementation Details
+
+### Windows Registry Access
+Uses `winreg` module to safely read PATH values:
+- Handles Unicode paths correctly
+- Manages registry value expansion
+- Provides clear error handling for permission issues
+
+### Data Processing Pipeline
+1. **Load raw PATH data** based on OS
+2. **Parse and split** using appropriate separator (`;` or `:`)
+3. **Create PathEntry objects** with existence checking
+4. **Apply formatting** for target interface (CLI/GUI)
+5. **Display results** with appropriate metadata
+
+### Memory Management
+- Efficient string processing for large PATH variables
+- Lazy loading of GUI components
+- Minimal memory footprint for CLI mode
+
+## Development Roadmap
+
+**Phase 2** - Problem Detection (Next)
+- Duplicate detection and resolution
+- Missing directory identification
+- Ordering issue analysis
+- Windows-specific problem detection
+
+**Phase 3** - Backup System
+- Automatic backup creation
+- Backup browser interface
+- Restore functionality
+
+**Phase 4** - PATH Modification
+- Safe add/remove/reorder operations
+- Preview and confirmation system
+- Undo/redo capabilities
+
+**Phase 5** - Polish & Distribution
+- Windows 11 UI styling
+- Installer creation
+- System tray integration
+
+## Conclusion
+
+PathManager has evolved from a simple PATH viewing script into a sophisticated, modular application that provides professional-grade PATH management capabilities. Its clean architecture ensures maintainability and extensibility while delivering a consistent experience across both CLI and GUI interfaces.
